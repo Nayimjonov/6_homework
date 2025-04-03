@@ -23,4 +23,6 @@ class Post(models.Model):
     status = models.CharField(max_length=9, choices=STATUS_CHOICES, default=STATUS_CHOICES[0][0])
     featured_image = models.ImageField(upload_to='post_images/')
 
+    def __str__(self):
+        return self.title
 
