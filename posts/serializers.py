@@ -2,6 +2,9 @@ from rest_framework import serializers
 from .models import Post
 
 
+class PostLikeSerializer(serializers.Serializer):
+    value = serializers.ChoiceField(choices=['like', 'dislike'])
+
 class PostAuthorSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
     username = serializers.CharField(read_only=True)
