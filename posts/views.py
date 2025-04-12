@@ -10,3 +10,7 @@ class PostViewSet(viewsets.ModelViewSet):
     serializer_class = PostSerializer
     pagination_class = PostPagination
     permission_classes = [IsAdminUser, IsAuthenticatedOrReadOnly]
+    lookup_field = 'slug'
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
