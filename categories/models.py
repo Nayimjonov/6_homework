@@ -22,3 +22,4 @@ class Tag(models.Model):
     name = models.CharField(max_length=100)
     slug = models.SlugField(unique=True)
 
+
