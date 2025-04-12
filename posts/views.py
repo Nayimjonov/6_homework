@@ -1,3 +1,12 @@
-from django.shortcuts import render
+from rest_framework import viewsets
+from rest_framework.permissions import IsAdminUser, IsAuthenticatedOrReadOnly
+from .models import Post
+from .serializers import PostSerializer
+from .paginations import PostPagination
 
-# Create your views here.
+
+class PostViewSet(viewsets.ModelViewSet):
+    queryset = Post.objects.all()
+    serializer_class = PostSerializer
+    pagination_class = PostPagination
+    permission_classes = [IsAdminUser, IsAuthenticatedOrReadOnly]
