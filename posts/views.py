@@ -30,11 +30,24 @@ class PostViewSet(viewsets.ModelViewSet):
             author=request.user,
             defaults={'value': serializer.validated_data['value']}
         )
-
         if not created:
             like_obj.value = serializer.validated_data['value']
             like_obj.save()
-
         return Response({
             'value': like_obj.value
         }, status=status.HTTP_200_OK)
+
+    # @action(detail=True, methods=['post'], url_path='comment')
+    # def comment(self, request, slug=None):
+    #     post = self.get_object()
+    #     serializer = CommentSerializer(data=request.data)
+    #     serializer.is_valid(raise_exception=True)
+    #     serializer.save(post=post, author=request.user)
+    #     return Response(serializer.data, status=status.HTTP_201_CREATED)
+    #
+    # @action(detail=True, methods=['get'], url_path='comments')
+    # def get_comments(self, request, slug=None):
+    #     post = self.get_object()
+    #     comments = post.comments.all()
+    #     serializer = CommentSerializer(comments, many=True)
+    #     return Response(serializer.data)
