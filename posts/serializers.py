@@ -1,8 +1,14 @@
 from rest_framework import serializers
-from .models import Post
+from .models import Post, PostLike
+from django.contrib.auth.models import User
 
 
-class PostLikeSerializer(serializers.Serializer):
+class AuthorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('id', 'username', 'first_name', 'last_name')
+
+class PostLikesSerializer(serializers.Serializer):
     value = serializers.ChoiceField(choices=['like', 'dislike'])
 
 class PostAuthorSerializer(serializers.Serializer):
@@ -50,3 +56,24 @@ class PostSerializer(serializers.ModelSerializer):
         rep['category'] = PostCategorySerializer(instance.category).data
         rep['tags'] = PostTagsSerializer(instance.tags.all(), many=True).data
         return rep
+
+
+class PostLikeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PostLike
+        fields = ['value']
+
+    def create(self, validated_data):
+        post = self.context['post']
+        user = self.context['request'].user
+        value = validated_data.get('value')
+        like, created = PostLike.objects.get_or_create(
+            post=post,
+            user=user,
+            defaults={'value': value}
+        )
+        if not created:
+            like.value = value
+            like.save()
+
+        return like
