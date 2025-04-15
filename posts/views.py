@@ -11,7 +11,6 @@ from users.permissions import IsAuthorOrReadOnly, IsPostAuthorOrAdminOrReadOnly
 
 
 class PostList(generics.ListCreateAPIView):
-    """List all posts or create a new post"""
     queryset = Post.objects.all()
     serializer_class = PostSerializer
     pagination_class = PostPagination
@@ -21,7 +20,6 @@ class PostList(generics.ListCreateAPIView):
         serializer.save(author=self.request.user)
 
     def get_queryset(self):
-        # Filter posts for public viewing
         if self.request.user.is_authenticated:
             return Post.objects.all()
         else:
@@ -29,7 +27,6 @@ class PostList(generics.ListCreateAPIView):
 
 
 class PostDetail(generics.RetrieveUpdateDestroyAPIView):
-    """Retrieve, update or delete a post"""
     queryset = Post.objects.all()
     serializer_class = PostSerializer
     permission_classes = [IsPostAuthorOrAdminOrReadOnly]
@@ -37,7 +34,6 @@ class PostDetail(generics.RetrieveUpdateDestroyAPIView):
 
 
 class PostLikeView(generics.GenericAPIView):
-    """Like or dislike a post"""
     serializer_class = PostLikeSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
     lookup_field = 'slug'
@@ -59,7 +55,6 @@ class PostLikeView(generics.GenericAPIView):
 
 
 class UserPostList(generics.ListAPIView):
-    """List all posts by a specific user"""
     serializer_class = PostSerializer
     pagination_class = PostPagination
 
@@ -68,10 +63,8 @@ class UserPostList(generics.ListAPIView):
         user = get_object_or_404(User, username=username)
 
         if self.request.user.is_authenticated:
-            # If authenticated, show all posts from the user
             return Post.objects.filter(author=user)
         else:
-            # If not authenticated, show only published posts
             return Post.objects.filter(
                 author=user,
                 status='published'
