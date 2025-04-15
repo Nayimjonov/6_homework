@@ -3,11 +3,12 @@ from .models import Category, Tag
 from .serializers import CategorySerializer, TagSerializer
 from posts.serializers import PostSerializer
 from posts.models import Post
-
+from .paginations import CategoryPagination, TagPagination
 
 class CategoryList(generics.ListCreateAPIView):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
+    pagination_class = CategoryPagination
 
     def get_permissions(self):
         if self.request.method == 'POST':
@@ -40,6 +41,7 @@ class CategoryPosts(generics.ListAPIView):
 class TagList(generics.ListCreateAPIView):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
+    pagination_class = TagPagination
 
     def get_permissions(self):
         if self.request.method == 'POST':
