@@ -8,7 +8,6 @@ class UserProfileSerializer(serializers.ModelSerializer):
         model = UserProfile
         fields = ('bio', 'profile_picture', 'website')
 
-
 class UserSerializer(serializers.ModelSerializer):
     profile = UserProfileSerializer()
 
@@ -19,15 +18,12 @@ class UserSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         profile_data = validated_data.pop('profile', {})
         profile = instance.userprofile
-
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         instance.save()
-
         for attr, value in profile_data.items():
             setattr(profile, attr, value)
         profile.save()
-
         return instance
 
 class UserRegisterSerializer(serializers.ModelSerializer):
