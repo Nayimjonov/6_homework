@@ -1,26 +1,53 @@
-from rest_framework import viewsets, status
-from rest_framework.decorators import action
+from rest_framework import generics, status
+from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import IsAdminUser, IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAdminUser
+from django.shortcuts import get_object_or_404
+from django.contrib.auth.models import User
 from .models import Post
 from .serializers import PostSerializer, PostLikeSerializer
 from .paginations import PostPagination
+from users.permissions import IsAuthorOrReadOnly, IsPostAuthorOrAdminOrReadOnly
 
 
-class PostViewSet(viewsets.ModelViewSet):
+class PostList(generics.ListCreateAPIView):
+    """List all posts or create a new post"""
     queryset = Post.objects.all()
     serializer_class = PostSerializer
     pagination_class = PostPagination
-    permission_classes = [IsAdminUser, IsAuthenticatedOrReadOnly]
-    lookup_field = 'slug'
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
-    @action(detail=True, methods=['post'], url_path='like', permission_classes=[IsAuthenticatedOrReadOnly])
-    def like(self, request, slug=None):
+    def get_queryset(self):
+        # Filter posts for public viewing
+        if self.request.user.is_authenticated:
+            return Post.objects.all()
+        else:
+            return Post.objects.filter(status='published')
+
+
+class PostDetail(generics.RetrieveUpdateDestroyAPIView):
+    """Retrieve, update or delete a post"""
+    queryset = Post.objects.all()
+    serializer_class = PostSerializer
+    permission_classes = [IsPostAuthorOrAdminOrReadOnly]
+    lookup_field = 'slug'
+
+
+class PostLikeView(generics.GenericAPIView):
+    """Like or dislike a post"""
+    serializer_class = PostLikeSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    lookup_field = 'slug'
+
+    def get_queryset(self):
+        return Post.objects.all()
+
+    def post(self, request, *args, **kwargs):
         post = self.get_object()
-        serializer = PostLikeSerializer(
+        serializer = self.get_serializer(
             data=request.data,
             context={'request': request, 'post': post}
         )
@@ -29,3 +56,23 @@ class PostViewSet(viewsets.ModelViewSet):
         return Response({
             'value': like.value
         }, status=status.HTTP_200_OK)
+
+
+class UserPostList(generics.ListAPIView):
+    """List all posts by a specific user"""
+    serializer_class = PostSerializer
+    pagination_class = PostPagination
+
+    def get_queryset(self):
+        username = self.kwargs['username']
+        user = get_object_or_404(User, username=username)
+
+        if self.request.user.is_authenticated:
+            # If authenticated, show all posts from the user
+            return Post.objects.filter(author=user)
+        else:
+            # If not authenticated, show only published posts
+            return Post.objects.filter(
+                author=user,
+                status='published'
+            )
