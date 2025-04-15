@@ -63,13 +63,11 @@ class UserUpdateSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         profile_data = validated_data.pop('profile', {})
 
-        # Update User model fields
         instance.email = validated_data.get('email', instance.email)
         instance.first_name = validated_data.get('first_name', instance.first_name)
         instance.last_name = validated_data.get('last_name', instance.last_name)
         instance.save()
 
-        # Update UserProfile fields
         profile = instance.profile
         profile.bio = profile_data.get('bio', profile.bio)
         profile.website = profile_data.get('website', profile.website)
