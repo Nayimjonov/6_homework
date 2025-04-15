@@ -1,14 +1,12 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from rest_framework.exceptions import ValidationError
-from django.contrib.auth.models import User
 from .models import UserProfile
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
-        fields = ['bio', 'profile_picture', 'website']
+        fields = ('bio', 'profile_picture', 'website')
 
 
 class UserSerializer(serializers.ModelSerializer):
